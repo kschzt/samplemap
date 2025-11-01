@@ -16,4 +16,4 @@ Keyboard shortcuts:
 
 Status: 0.1 — the basics are in and working. 
 
-License: MIT.
+License: GPL-3.0.

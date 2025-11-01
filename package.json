@@ -2,7 +2,7 @@
   "name": "samplemap",
   "private": false,
   "version": "0.1.0",
-  "license": "MIT",
+  "license": "GPL-3.0-only",
   "description": "Sample Map: zoomable point-cloud WAV browser (CLAP+UMAP)",
   "type": "module",
   "scripts": {
