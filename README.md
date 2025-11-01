@@ -14,6 +14,6 @@ Keyboard shortcuts:
 - Right‑drag: pan
 - Wheel: zoom
 
-Status: MVP is playable and mapping works; indexing/embedding pipeline and large‑set performance are under active iteration.
+Status: 0.1 — everything is working.
 
 License: MIT.
