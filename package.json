@@ -1,7 +1,9 @@
 {
-  "name": "app",
-  "private": true,
-  "version": "0.0.0",
+  "name": "synth-map",
+  "private": false,
+  "version": "0.1.0",
+  "license": "MIT",
+  "description": "Synth Map: zoomable point-cloud WAV browser (CLAP+UMAP)",
   "type": "module",
   "scripts": {
     "dev": "vite",
