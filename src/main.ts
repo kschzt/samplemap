@@ -22,7 +22,7 @@ app.innerHTML = `
   <div class="content">
     <div class="canvaswrap">
       <canvas id="gl" class="webgl"></canvas>
-      <div class="hud">Left-click: play • Right-drag: pan • Wheel: zoom</div>
+      <div class="hud">Left-click: play • Right-drag: pan • Wheel: zoom • Space: replay • Shift+Space: stop</div>
     </div>
   </div>
 `
@@ -93,7 +93,28 @@ revealBtn.addEventListener('click', async () => {
 window.addEventListener('keydown', async (e) => {
   if (e.code === 'Space') {
     e.preventDefault()
-    await invoke('stop_playback')
+    if (e.shiftKey) {
+      await invoke('stop_playback')
+    } else {
+      // Replay current selection if any
+      if (cursor >= 0 && cursor < history.length) {
+        const id = history[cursor]
+        try {
+          let path = idToPath.get(id)
+          if (!path) {
+            const info = await invoke('get_file_info', { fileId: id }) as { path: string }
+            path = info.path
+            idToPath.set(id, path)
+          }
+          await invoke('play_file', { path })
+          selPathEl.textContent = `Selected: ${path}`
+          currentPath = path
+          try { await invoke('copy_to_clipboard', { text: path }) } catch {}
+        } catch (err) {
+          console.error('replay failed', err)
+        }
+      }
+    }
   }
 })
 
