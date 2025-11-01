@@ -44,6 +44,8 @@ const canvas = document.getElementById('gl') as HTMLCanvasElement
 const scatter = new Scatter(canvas)
 
 let idToPath = new Map<number, string>()
+let history: number[] = []
+let cursor = -1 // index in history; -1 means none yet
 
 async function loadCoords() {
   const page = 50000
@@ -129,6 +131,15 @@ refreshBtn.addEventListener('click', async () => {
 let playQueue = Promise.resolve()
 scatter.onPick = (res) => {
   if (!res) return
+  // Update history: drop forward if we've navigated back
+  if (cursor >= 0 && cursor < history.length - 1) {
+    history = history.slice(0, cursor + 1)
+  }
+  if (history.length === 0 || history[history.length - 1] !== res.id) {
+    history.push(res.id)
+  }
+  cursor = history.length - 1
+  scatter.setSelectedId(res.id)
   playQueue = playQueue.then(async () => {
     try {
       let path = idToPath.get(res.id)
@@ -146,3 +157,37 @@ scatter.onPick = (res) => {
     }
   })
 }
+
+function selectFromHistory(delta: number) {
+  if (history.length === 0) return
+  const next = cursor + delta
+  if (next < 0 || next >= history.length) return
+  cursor = next
+  const id = history[cursor]
+  scatter.setSelectedId(id)
+  scatter.centerOnSelected(true)
+  // trigger playback and status update
+  playQueue = playQueue.then(async () => {
+    try {
+      let path = idToPath.get(id)
+      if (!path) {
+        const info = await invoke('get_file_info', { fileId: id }) as { path: string }
+        path = info.path
+        idToPath.set(id, path)
+      }
+      await invoke('play_file', { path })
+      selPathEl.textContent = `Selected: ${path}`
+      currentPath = path
+      try { await invoke('copy_to_clipboard', { text: path }) } catch {}
+    } catch (e) {
+      console.error('history play failed', e)
+    }
+  })
+}
+
+window.addEventListener('keydown', (e) => {
+  if (e.key === 'ArrowLeft') { e.preventDefault(); selectFromHistory(-1) }
+  else if (e.key === 'ArrowRight') { e.preventDefault(); selectFromHistory(1) }
+  else if (e.key === 'ArrowUp') { e.preventDefault(); selectFromHistory(-1) }
+  else if (e.key === 'ArrowDown') { e.preventDefault(); selectFromHistory(1) }
+})

@@ -11,10 +11,12 @@ export class Scatter {
   private uScale: WebGLUniformLocation
   private uTranslate: WebGLUniformLocation
   private uPointSize: WebGLUniformLocation
+  private uColor: WebGLUniformLocation
 
   private points: Point[] = []
   private data: Float32Array = new Float32Array()
   private needsUpload = false
+  private idToIndex = new Map<number, number>()
 
   // view state
   private scale = 1
@@ -23,6 +25,7 @@ export class Scatter {
   private dragging = false
   private lastX = 0
   private lastY = 0
+  private selectedIndex = -1
 
   // spatial hash for picking in world space
   private grid = new Map<string, number[]>() // key:"gx,gy" -> indices
@@ -48,18 +51,20 @@ export class Scatter {
     }`
     const fs = `#version 300 es
     precision highp float;
+    uniform vec3 uColor;
     out vec4 o;
     void main(){
       vec2 d = gl_PointCoord - vec2(0.5);
       float r = dot(d,d);
       if(r>0.25) discard;
-      o = vec4(0.65,0.75,0.95,1.0);
+      o = vec4(uColor,1.0);
     }`
     const prog = this.createProgram(vs, fs)
     this.program = prog
     this.uScale = gl.getUniformLocation(prog, 'uScale')!
     this.uTranslate = gl.getUniformLocation(prog, 'uTranslate')!
     this.uPointSize = gl.getUniformLocation(prog, 'uPointSize')!
+    this.uColor = gl.getUniformLocation(prog, 'uColor')!
     this.buf = gl.createBuffer()!
     this.vao = gl.createVertexArray()!
     gl.bindVertexArray(this.vao)
@@ -79,9 +84,11 @@ export class Scatter {
   setPoints(pts: Point[]) {
     this.points = pts
     this.data = new Float32Array(pts.length * 2)
+    this.idToIndex.clear()
     for (let i = 0; i < pts.length; i++) {
       this.data[i * 2 + 0] = pts[i].x
       this.data[i * 2 + 1] = pts[i].y
+      this.idToIndex.set(pts[i].id, i)
     }
     this.rebuildGrid()
     this.needsUpload = true
@@ -97,6 +104,7 @@ export class Scatter {
       const idx = (this.points.length - pts.length + i) * 2
       newData[idx + 0] = pts[i].x
       newData[idx + 1] = pts[i].y
+      this.idToIndex.set(pts[i].id, this.points.length - pts.length + i)
     }
     this.data = newData
     this.addToGrid(this.points.length - pts.length)
@@ -180,6 +188,35 @@ export class Scatter {
     })
   }
 
+  setSelectedId(id: number | null) {
+    if (id == null) { this.selectedIndex = -1; this.invalidate(); return }
+    const idx = this.idToIndex.get(id)
+    this.selectedIndex = (idx != null ? idx : -1)
+    this.invalidate()
+  }
+
+  centerOnSelected(smooth = true) {
+    if (this.selectedIndex < 0) return
+    const p = this.points[this.selectedIndex]
+    const targetTx = -p.x * this.scale
+    const targetTy = -p.y * this.scale
+    if (!smooth) {
+      this.tx = targetTx; this.ty = targetTy; this.invalidate(); return
+    }
+    const startTx = this.tx, startTy = this.ty
+    const dur = 150
+    const t0 = performance.now()
+    const step = () => {
+      const t = Math.min(1, (performance.now() - t0) / dur)
+      const ease = t * (2 - t)
+      this.tx = startTx + (targetTx - startTx) * ease
+      this.ty = startTy + (targetTy - startTy) * ease
+      this.invalidate()
+      if (t < 1) requestAnimationFrame(step)
+    }
+    requestAnimationFrame(step)
+  }
+
   private pick(px: number, py: number): PickResult {
     // Use CSS pixel space for input and projection to avoid DPR mismatch
     const rect = this.canvas.getBoundingClientRect()
@@ -248,6 +285,7 @@ export class Scatter {
     gl.uniform2f(this.uTranslate, this.tx, this.ty)
     const ps = Math.max(1.5, Math.min(6.0, 3.0 / Math.sqrt(this.scale)))
     gl.uniform1f(this.uPointSize, ps)
+    gl.uniform3f(this.uColor, 0.65, 0.75, 0.95)
     gl.bindVertexArray(this.vao)
     if (this.needsUpload) {
       gl.bindBuffer(gl.ARRAY_BUFFER, this.buf)
@@ -255,6 +293,12 @@ export class Scatter {
       this.needsUpload = false
     }
     gl.drawArrays(gl.POINTS, 0, this.points.length)
+    // highlight selected point overlay
+    if (this.selectedIndex >= 0 && this.selectedIndex < this.points.length) {
+      gl.uniform1f(this.uPointSize, ps * 1.8)
+      gl.uniform3f(this.uColor, 0.85, 0.95, 1.0)
+      gl.drawArrays(gl.POINTS, this.selectedIndex, 1)
+    }
     gl.bindVertexArray(null)
   }
 
