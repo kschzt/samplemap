@@ -4,7 +4,15 @@
 
 Zoomable point‑cloud browser for WAV samples: scans a folder, embeds with CLAP (HTS‑AT), maps with UMAP, and renders a WebGL scatter; click any dot to instantly audition, copy its path, and reveal in Explorer.
 
-Run (dev): `npx tauri dev`
+Installation: install Rust and Node.js, then `npm i` and `npx tauri dev` (optional: install a CUDA build of PyTorch to accelerate embeddings).
+
+Keyboard shortcuts:
+- Left/Right (or Up/Down): navigate selection history and auto‑play
+- Space: replay current selection
+- Shift+Space: stop playback
+- Left‑click: select + play
+- Right‑drag: pan
+- Wheel: zoom
 
 Status: MVP is playable and mapping works; indexing/embedding pipeline and large‑set performance are under active iteration.
 
