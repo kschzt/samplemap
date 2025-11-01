@@ -8,7 +8,8 @@ pub fn db_path(app: &tauri::AppHandle) -> Result<PathBuf> {
     #[cfg(target_os = "windows")]
     {
         if let Ok(local) = std::env::var("LOCALAPPDATA") {
-            let base = PathBuf::from(local).join("SampleMap");
+            let local_pb = PathBuf::from(local);
+            let base = local_pb.join("SampleMap");
             let unified = base.join("samplemap.sqlite");
             let _ = std::fs::create_dir_all(&base);
             // One-time migrate from previous app_data_dir if needed
@@ -16,7 +17,7 @@ pub fn db_path(app: &tauri::AppHandle) -> Result<PathBuf> {
                 // prior Tauri app_data_dir location
                 if let Ok(old_base) = app.path().app_data_dir() { let old = old_base.join("synthmap.sqlite"); if old.exists() { let _ = std::fs::copy(&old, &unified); } }
                 // migrate from old SynthMap folder/name
-                let old_named = PathBuf::from(local).join("SynthMap").join("synthmap.sqlite");
+                let old_named = local_pb.join("SynthMap").join("synthmap.sqlite");
                 if !unified.exists() && old_named.exists() { let _ = std::fs::copy(&old_named, &unified); }
             }
             return Ok(unified);
@@ -27,13 +28,14 @@ pub fn db_path(app: &tauri::AppHandle) -> Result<PathBuf> {
     #[cfg(not(target_os = "windows"))]
     {
         if let Ok(home) = std::env::var("HOME") {
-            let base = PathBuf::from(home).join(".local").join("share").join("samplemap");
+            let home_pb = PathBuf::from(home);
+            let base = home_pb.join(".local").join("share").join("samplemap");
             let unified = base.join("samplemap.sqlite");
             let _ = std::fs::create_dir_all(&base);
             if !unified.exists() {
                 if let Ok(old_base) = app.path().app_data_dir() { let old = old_base.join("synthmap.sqlite"); if old.exists() { let _ = std::fs::copy(&old, &unified); } }
                 // migrate from old synthmap path
-                let old_named = PathBuf::from(home).join(".local").join("share").join("synthmap").join("synthmap.sqlite");
+                let old_named = home_pb.join(".local").join("share").join("synthmap").join("synthmap.sqlite");
                 if !unified.exists() && old_named.exists() { let _ = std::fs::copy(&old_named, &unified); }
             }
             return Ok(unified);

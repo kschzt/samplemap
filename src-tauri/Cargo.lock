@@ -3697,6 +3697,30 @@ dependencies = [
 ]
 
 [[package]]
+name = "sample-map"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "hound",
+ "log",
+ "once_cell",
+ "parking_lot",
+ "rodio",
+ "rusqlite",
+ "serde",
+ "serde_json",
+ "tauri",
+ "tauri-build",
+ "tauri-plugin-clipboard-manager",
+ "tauri-plugin-dialog",
+ "tauri-plugin-log",
+ "thiserror 1.0.69",
+ "time",
+ "uuid",
+ "walkdir",
+]
+
+[[package]]
 name = "schemars"
 version = "0.8.22"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -4226,30 +4250,6 @@ dependencies = [
  "proc-macro2",
  "quote",
  "syn 2.0.107",
-]
-
-[[package]]
-name = "synth-map"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "hound",
- "log",
- "once_cell",
- "parking_lot",
- "rodio",
- "rusqlite",
- "serde",
- "serde_json",
- "tauri",
- "tauri-build",
- "tauri-plugin-clipboard-manager",
- "tauri-plugin-dialog",
- "tauri-plugin-log",
- "thiserror 1.0.69",
- "time",
- "uuid",
- "walkdir",
 ]
 
 [[package]]
