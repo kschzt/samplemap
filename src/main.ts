@@ -60,6 +60,9 @@ async function loadCoords() {
   idToPath.clear()
 }
 
+// Load any cached map data on startup so the user doesn't need to refresh
+void loadCoords()
+
 chooseBtn.addEventListener('click', async () => {
   let dir: string | null = null
   try {
