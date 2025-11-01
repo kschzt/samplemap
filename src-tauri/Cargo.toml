@@ -1,8 +1,8 @@
 [package]
-name = "synth-map"
+name = "sample-map"
 version = "0.1.0"
-description = "Synth Map: zoomable point-cloud WAV browser (CLAP+UMAP)"
-authors = ["Synth Map contributors"]
+description = "Sample Map: zoomable point-cloud WAV browser (CLAP+UMAP)"
+authors = ["Sample Map contributors"]
 license = "MIT"
 repository = ""
 edition = "2021"

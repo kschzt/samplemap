@@ -1,9 +1,9 @@
 {
-  "name": "synth-map",
+  "name": "samplemap",
   "private": false,
   "version": "0.1.0",
   "license": "MIT",
-  "description": "Synth Map: zoomable point-cloud WAV browser (CLAP+UMAP)",
+  "description": "Sample Map: zoomable point-cloud WAV browser (CLAP+UMAP)",
   "type": "module",
   "scripts": {
     "dev": "vite",

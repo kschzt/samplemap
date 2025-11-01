@@ -1,6 +1,6 @@
 """
-Synth Map Python Worker
-- Bootstrap a venv under LocalAppData/SynthMap/venv
+Sample Map Python Worker
+- Bootstrap a venv under LocalAppData/SampleMap/venv
 - Install deps: torch, laion-clap, librosa, umap-learn, soundfile, numpy
 - Compute CLAP (HTSAT-base) 512-D embeddings (48kHz mono, first N sec)
 - Compute 2D UMAP (cosine) and store normalized coords
@@ -24,9 +24,9 @@ def appdata_dir() -> Path:
         base = os.environ.get('LOCALAPPDATA') or os.environ.get('APPDATA')
         if not base:
             raise RuntimeError('No LOCALAPPDATA/APPDATA set')
-        d = Path(base) / 'SynthMap'
+        d = Path(base) / 'SampleMap'
     else:
-        d = Path.home() / '.local' / 'share' / 'synthmap'
+        d = Path.home() / '.local' / 'share' / 'samplemap'
     d.mkdir(parents=True, exist_ok=True)
     return d
 

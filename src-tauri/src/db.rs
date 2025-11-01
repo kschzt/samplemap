@@ -8,36 +8,33 @@ pub fn db_path(app: &tauri::AppHandle) -> Result<PathBuf> {
     #[cfg(target_os = "windows")]
     {
         if let Ok(local) = std::env::var("LOCALAPPDATA") {
-            let base = PathBuf::from(local).join("SynthMap");
-            let unified = base.join("synthmap.sqlite");
+            let base = PathBuf::from(local).join("SampleMap");
+            let unified = base.join("samplemap.sqlite");
             let _ = std::fs::create_dir_all(&base);
             // One-time migrate from previous app_data_dir if needed
             if !unified.exists() {
-                if let Ok(old_base) = app.path().app_data_dir() {
-                    let old = old_base.join("synthmap.sqlite");
-                    if old.exists() {
-                        let _ = std::fs::copy(&old, &unified);
-                    }
-                }
+                // prior Tauri app_data_dir location
+                if let Ok(old_base) = app.path().app_data_dir() { let old = old_base.join("synthmap.sqlite"); if old.exists() { let _ = std::fs::copy(&old, &unified); } }
+                // migrate from old SynthMap folder/name
+                let old_named = PathBuf::from(local).join("SynthMap").join("synthmap.sqlite");
+                if !unified.exists() && old_named.exists() { let _ = std::fs::copy(&old_named, &unified); }
             }
             return Ok(unified);
         }
     }
 
-    // Non-Windows: use ~/.local/share/synthmap/synthmap.sqlite
+    // Non-Windows: use ~/.local/share/samplemap/samplemap.sqlite
     #[cfg(not(target_os = "windows"))]
     {
         if let Ok(home) = std::env::var("HOME") {
-            let base = PathBuf::from(home).join(".local").join("share").join("synthmap");
-            let unified = base.join("synthmap.sqlite");
+            let base = PathBuf::from(home).join(".local").join("share").join("samplemap");
+            let unified = base.join("samplemap.sqlite");
             let _ = std::fs::create_dir_all(&base);
             if !unified.exists() {
-                if let Ok(old_base) = app.path().app_data_dir() {
-                    let old = old_base.join("synthmap.sqlite");
-                    if old.exists() {
-                        let _ = std::fs::copy(&old, &unified);
-                    }
-                }
+                if let Ok(old_base) = app.path().app_data_dir() { let old = old_base.join("synthmap.sqlite"); if old.exists() { let _ = std::fs::copy(&old, &unified); } }
+                // migrate from old synthmap path
+                let old_named = PathBuf::from(home).join(".local").join("share").join("synthmap").join("synthmap.sqlite");
+                if !unified.exists() && old_named.exists() { let _ = std::fs::copy(&old_named, &unified); }
             }
             return Ok(unified);
         }
@@ -49,7 +46,7 @@ pub fn db_path(app: &tauri::AppHandle) -> Result<PathBuf> {
         .app_data_dir()
         .context("no app_data_dir path available")?;
     std::fs::create_dir_all(&base).ok();
-    Ok(base.join("synthmap.sqlite"))
+    Ok(base.join("samplemap.sqlite"))
 }
 
 pub fn open_or_create(path: &Path) -> Result<Connection> {
