@@ -14,6 +14,6 @@ Keyboard shortcuts:
 - Right‑drag: pan
 - Wheel: zoom
 
-Status: 0.1 — everything is working.
+Status: 0.1 — the basics are in and working. 
 
 License: MIT.
